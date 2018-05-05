@@ -11,6 +11,7 @@ import com.atlassian.jira.issue.*;
 import com.atlassian.jira.issue.link.IssueLink;
 import com.atlassian.jira.issue.link.IssueLinkManager;
 import com.atlassian.jira.issue.link.LinkCollection;
+import com.atlassian.jira.issue.resolution.Resolution;
 import com.atlassian.jira.issue.status.Status;
 import com.atlassian.jira.security.JiraAuthenticationContext;
 import com.atlassian.jira.user.ApplicationUser;
@@ -40,6 +41,7 @@ public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
     private final IssueManager issueManager;
     private final JiraAuthenticationContext authenticationContext;
     private final Status closedStatus;
+    private Resolution resolution;
 
     public CloseParentIssuePostFunction(@ComponentImport ConstantsManager constantsManager, @ComponentImport WorkflowManager workflowManager,
                                         @ComponentImport SubTaskManager subTaskManager, @ComponentImport JiraAuthenticationContext authenticationContext, @ComponentImport IssueManager issueManager) {
@@ -57,8 +59,32 @@ public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
         System.out.println("exec");
         // Retrieve the sub-task
         MutableIssue subTask=getIssue(transientVars);
+
+
+        ///////
+        List<Issue> linkedIssuesToSub = new ArrayList<Issue>();
+        IssueLinkManager issueLinkManager = ComponentAccessor.getIssueLinkManager();
+        for(IssueLink issueLink: issueLinkManager.getInwardLinks(subTask.getId())){
+            System.out.println(issueLink.getDestinationObject().getKey());
+            System.out.println();
+            linkedIssuesToSub.add(issueManager.getIssueObject(issueLink.getSourceObject().getKey()));
+            System.out.println("");
+
+        }
+        /////
+
+
         // Retrieve the parent issue
-        MutableIssue parentIssue = ComponentAccessor.getIssueManager().getIssueObject(subTask.getParentId());
+//        MutableIssue parentIssue = ComponentAccessor.getIssueManager().getIssueObject(subTask.getParentId());
+
+        //Le Costil 2 - пока что будем доставать будто одна родителтская задача боже хочу спать
+        Issue parentIssue = null;
+        try {
+            parentIssue = linkedIssuesToSub.get(0);
+        }
+        catch (Exception e) {
+            return;
+        }
 
         if (parentIssue == null) {
             return;
@@ -76,7 +102,7 @@ public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
         Collection<Issue> linkedIssues = new ArrayList<Issue>();
 
 
-        IssueLinkManager issueLinkManager = ComponentAccessor.getIssueLinkManager();
+//        IssueLinkManager issueLinkManager = ComponentAccessor.getIssueLinkManager();
         for(IssueLink issueLink: issueLinkManager.getOutwardLinks(parentIssue.getId())){
             System.out.println(issueLink.getDestinationObject().getKey());
             System.out.println();
@@ -85,13 +111,11 @@ public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
 
         }
 
-//        Collection<Issue> linkedTasks =
-        //////////////////////////
 
         // Check that ALL OTHER sub-tasks are closed
-        Collection<Issue> subTasks = subTaskManager.getSubTaskObjects(parentIssue);
+//        Collection<Issue> subTasks = subTaskManager.getSubTaskObjects(parentIssue);
 
-        for (Iterator<Issue> iterator = subTasks.iterator(); iterator.hasNext();)
+        for (Iterator<Issue> iterator = linkedIssues.iterator(); iterator.hasNext();)
         {
             Issue associatedSubTask =  iterator.next();
             if (!subTask.getKey().equals(associatedSubTask.getKey()))
@@ -109,6 +133,7 @@ public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
         try
         {
             System.out.println("TRY");
+            resolution = subTask.getResolution();
             closeIssue(parentIssue);
             System.out.println("TRY DONE");
         }
@@ -142,6 +167,7 @@ public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
             }
         }
         System.out.println(closeAction);
+
         if (closeAction != null)
         {
             System.out.println("doing");
@@ -155,5 +181,20 @@ public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
             IssueService.IssueResult result = issueService.transition(currentUser, validationResult);
             System.out.println("done");
         }
+
+//        if (closeAction != null)
+//        {
+//            System.out.println("doing");
+//            ApplicationUser currentUser =  authenticationContext.getLoggedInUser();
+//            IssueService issueService = ComponentAccessor.getIssueService();
+//            IssueInputParameters parameters = issueService.newIssueInputParameters();
+//            parameters.setRetainExistingValuesWhenParameterNotProvided(true);
+//
+////            parameters.setResolutionId(resolution.getId());
+//            IssueService.TransitionValidationResult validationResult =
+//                    issueService.validateTransition(currentUser, issue.getId(), closeAction.getId(), parameters);
+//            IssueService.IssueResult result = issueService.transition(currentUser, validationResult);
+//            System.out.println("done");
+//        }
     }
 }
