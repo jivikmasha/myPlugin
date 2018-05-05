@@ -48,18 +48,21 @@ public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
         this.workflowManager = workflowManager;
         this.subTaskManager = subTaskManager;
         this.authenticationContext = authenticationContext;
-        closedStatus = constantsManager.getStatusObject(new Integer(IssueFieldConstants.CLOSED_STATUS_ID).toString());
+        System.out.println("constructor");
+        closedStatus = constantsManager.getStatus(Integer.toString(IssueFieldConstants.CLOSED_STATUS_ID));
+        System.out.println("notice me");
+        System.out.println(closedStatus);
     }
 
     public void execute(Map transientVars, Map args, PropertySet ps)throws WorkflowException{
-
+        System.out.println("exec");
         // Retrieve the sub-task
         MutableIssue subTask=getIssue(transientVars);
         // Retrieve the parent issue
         MutableIssue parentIssue = ComponentAccessor.getIssueManager().getIssueObject(subTask.getParentId());
 
         // Ensure that the parent issue is not already closed
-        if (IssueFieldConstants.CLOSED_STATUS_ID == Integer.parseInt(parentIssue.getStatusObject().getId()))
+        if (IssueFieldConstants.CLOSED_STATUS_ID == Integer.parseInt(parentIssue.getStatusId()))
         {
             return;
         }
@@ -74,7 +77,7 @@ public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
             {
                 // If other associated sub-task is still open - do not continue
                 if (IssueFieldConstants.CLOSED_STATUS_ID !=
-                        Integer.parseInt(associatedSubTask.getStatusObject().getId()))
+                        Integer.parseInt(associatedSubTask.getStatusId()))
                 {
                     return;
                 }
@@ -84,10 +87,13 @@ public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
         // All sub-tasks are now closed - close the parent issue
         try
         {
+            System.out.println("TRY");
             closeIssue(parentIssue);
+            System.out.println("TRY DONE");
         }
         catch (WorkflowException e)
         {
+            System.out.println("error");
             log.error("Error occurred while closing the issue: " + parentIssue.getString("key") + ": " + e, e);
             e.printStackTrace();
         }
@@ -95,21 +101,29 @@ public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
 
     private void closeIssue(Issue issue) throws WorkflowException
     {
-        Status currentStatus = issue.getStatusObject();
+        Status currentStatus = issue.getStatus();
         JiraWorkflow workflow = workflowManager.getWorkflow(issue);
         List<ActionDescriptor> actions = workflow.getLinkedStep(currentStatus).getActions();
+        System.out.println(actions);
         // look for the closed transition
         ActionDescriptor closeAction = null;
+        System.out.println(closedStatus.getName());
+        System.out.println(closedStatus);
         for (ActionDescriptor descriptor : actions)
         {
+            System.out.println("descriptor");
+            System.out.println(descriptor.getUnconditionalResult().getStatus());
             if (descriptor.getUnconditionalResult().getStatus().equals(closedStatus.getName()))
             {
                 closeAction = descriptor;
+                System.out.println("found");
                 break;
             }
         }
+        System.out.println(closeAction);
         if (closeAction != null)
         {
+            System.out.println("doing");
             ApplicationUser currentUser =  authenticationContext.getLoggedInUser();
             IssueService issueService = ComponentAccessor.getIssueService();
             IssueInputParameters parameters = issueService.newIssueInputParameters();
@@ -118,6 +132,7 @@ public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
                     issueService.validateTransition(currentUser, issue.getId(),
                             closeAction.getId(), parameters);
             IssueService.IssueResult result = issueService.transition(currentUser, validationResult);
+            System.out.println("done");
         }
     }
 }
