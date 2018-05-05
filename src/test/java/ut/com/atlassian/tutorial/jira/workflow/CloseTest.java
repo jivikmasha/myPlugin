@@ -22,43 +22,43 @@ public class CloseTest
 
     @Before
     public void setup() {
-//        issue = mock(MutableIssue.class);
-//        when(issue.getDescription()).thenReturn("");
-//
-//        function = new Close() {
-//            protected MutableIssue getIssue(Map transientVars) {
-//                return issue;
-//            }
-//        };
+        issue = mock(MutableIssue.class);
+        when(issue.getDescription()).thenReturn("");
+
+        function = new Close() {
+            protected MutableIssue getIssue(Map transientVars) {
+                return issue;
+            }
+        };
     }
 
     @Test
     public void testNullMessage() throws Exception
     {
-//        Map transientVars = Collections.emptyMap();
-//        function.execute(transientVars, null, null);
-//
-//        verify(issue).setDescription("");
+        Map transientVars = Collections.emptyMap();
+        function.execute(transientVars, null, null);
+
+        verify(issue).setDescription("");
     }
 
     @Test
     public void testEmptyMessage() throws Exception
     {
-//        Map transientVars = new HashMap();
-//        transientVars.put("messageField", "");
-//        function.execute(transientVars, null, null);
-//
-//        verify(issue).setDescription("");
+        Map transientVars = new HashMap();
+        transientVars.put("messageField", "");
+        function.execute(transientVars, null, null);
+
+        verify(issue).setDescription("");
     }
 
     @Test
     public void testValidMessage() throws Exception
     {
-//        Map transientVars = new HashMap();
-//        transientVars.put("messageField", MESSAGE);
-//        function.execute(transientVars, null, null);
-//
-//        verify(issue).setDescription(MESSAGE);
+        Map transientVars = new HashMap();
+        transientVars.put("messageField", MESSAGE);
+        function.execute(transientVars, null, null);
+
+        verify(issue).setDescription(MESSAGE);
     }
 
 }

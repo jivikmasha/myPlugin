@@ -31,19 +31,9 @@
     <label key="atlassian-developers-site.label">579</label>
     <link linkId="atlassian-developers-site-link">http://vk.com/mary_prince</link>
   </web-item>
-  <!--<workflow-function key="close-parent-issue-post-function" name="Close Parent Issue Post Function" i18n-name-key="close-parent-issue-post-function.name" class="com.atlassian.jira.plugin.workflow.WorkflowNoInputPluginFactory">-->
-  <!--<description key="close-parent-issue-post-function.description">The Close Parent Issue Post Function Plugin</description>-->
-  <!--<function-class>com.example.plugins.tutorial.jira.workflow.CloseParentIssuePostFunction</function-class>-->
-  <!--<resource type="velocity" name="view" location="templates/postfunctions/close-parent-issue-post-function.vm"/>-->
-  <!--</workflow-function>-->
   <workflow-function key="close" name="Close" i18n-name-key="close.name" class="com.atlassian.jira.plugin.workflow.WorkflowNoInputPluginFactory">
   <description key="close.description">The Close Plugin</description>
-  <function-class>com.atlassian.tutorial.jira.workflow.Close</function-class>
+  <function-class>com.example.plugins.tutorial.jira.workflow.CloseParentIssuePostFunction</function-class>
   <resource type="velocity" name="view" location="templates/postfunctions/close.vm"/>
   </workflow-function>
-  <!--<workflow-function key="close-2" name="Close" i18n-name-key="close.name" class="com.atlassian.jira.plugin.workflow.WorkflowNoInputPluginFactory">-->
-    <!--<description key="close.description">The Close 2 Plugin</description>-->
-    <!--<function-class>com.atlassian.tutorial.jira.workflow.Close</function-class>-->
-    <!--<resource type="velocity" name="view" location="templates/postfunctions/close.vm"/>-->
-  <!--</workflow-function>-->
 </atlassian-plugin>
