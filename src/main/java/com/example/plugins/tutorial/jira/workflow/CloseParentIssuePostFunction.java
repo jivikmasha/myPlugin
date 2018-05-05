@@ -61,6 +61,10 @@ public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
         // Retrieve the parent issue
         MutableIssue parentIssue = ComponentAccessor.getIssueManager().getIssueObject(subTask.getParentId());
 
+        if (parentIssue == null) {
+            return;
+        }
+
         // Ensure that the parent issue is not already closed
         if (IssueFieldConstants.CLOSED_STATUS_ID == Integer.parseInt(parentIssue.getStatusId()))
         {
