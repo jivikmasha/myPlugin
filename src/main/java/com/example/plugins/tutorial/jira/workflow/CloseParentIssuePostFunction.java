@@ -20,6 +20,8 @@ import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.workflow.JiraWorkflow;
 import com.atlassian.jira.workflow.WorkflowManager;
 import com.atlassian.jira.workflow.function.issue.AbstractJiraFunctionProvider;
+import com.atlassian.plugin.spring.scanner.annotation.component.Scanned;
+import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
 import com.opensymphony.module.propertyset.PropertySet;
 import com.opensymphony.workflow.WorkflowException;
 
@@ -31,6 +33,7 @@ import org.slf4j.LoggerFactory;
  * This is the post-function class that gets executed at the end of the transition.
  * Any parameters that were saved in your factory class will be available in the transientVars Map.
  */
+@Scanned
 public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
 {
     private static final Logger log = LoggerFactory.getLogger(CloseParentIssuePostFunction.class);
@@ -40,8 +43,8 @@ public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
     private final JiraAuthenticationContext authenticationContext;
     private final Status closedStatus;
 
-    public CloseParentIssuePostFunction(ConstantsManager constantsManager, WorkflowManager workflowManager,
-                                        SubTaskManager subTaskManager, JiraAuthenticationContext authenticationContext) {
+    public CloseParentIssuePostFunction(@ComponentImport ConstantsManager constantsManager, @ComponentImport WorkflowManager workflowManager,
+                                        @ComponentImport SubTaskManager subTaskManager, @ComponentImport JiraAuthenticationContext authenticationContext) {
         this.workflowManager = workflowManager;
         this.subTaskManager = subTaskManager;
         this.authenticationContext = authenticationContext;
