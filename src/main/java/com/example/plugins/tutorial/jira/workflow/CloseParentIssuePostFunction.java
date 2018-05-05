@@ -1,19 +1,16 @@
 package com.example.plugins.tutorial.jira.workflow;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.atlassian.crowd.embedded.api.User;
 import com.atlassian.jira.bc.issue.IssueService;
 import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.config.ConstantsManager;
 import com.atlassian.jira.config.SubTaskManager;
-import com.atlassian.jira.issue.Issue;
-import com.atlassian.jira.issue.IssueFieldConstants;
-import com.atlassian.jira.issue.IssueInputParameters;
-import com.atlassian.jira.issue.MutableIssue;
+import com.atlassian.jira.issue.*;
+import com.atlassian.jira.issue.link.IssueLink;
+import com.atlassian.jira.issue.link.IssueLinkManager;
+import com.atlassian.jira.issue.link.LinkCollection;
 import com.atlassian.jira.issue.status.Status;
 import com.atlassian.jira.security.JiraAuthenticationContext;
 import com.atlassian.jira.user.ApplicationUser;
@@ -40,14 +37,16 @@ public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
     public static final String FIELD_MESSAGE = "messageField";
     private final WorkflowManager workflowManager;
     private final SubTaskManager subTaskManager;
+    private final IssueManager issueManager;
     private final JiraAuthenticationContext authenticationContext;
     private final Status closedStatus;
 
     public CloseParentIssuePostFunction(@ComponentImport ConstantsManager constantsManager, @ComponentImport WorkflowManager workflowManager,
-                                        @ComponentImport SubTaskManager subTaskManager, @ComponentImport JiraAuthenticationContext authenticationContext) {
+                                        @ComponentImport SubTaskManager subTaskManager, @ComponentImport JiraAuthenticationContext authenticationContext, @ComponentImport IssueManager issueManager) {
         this.workflowManager = workflowManager;
         this.subTaskManager = subTaskManager;
         this.authenticationContext = authenticationContext;
+        this.issueManager = issueManager;
         System.out.println("constructor");
         closedStatus = constantsManager.getStatus(Integer.toString(IssueFieldConstants.CLOSED_STATUS_ID));
         System.out.println("notice me");
@@ -70,6 +69,24 @@ public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
         {
             return;
         }
+
+
+        //////////////////////////
+        // Get all linked tasks :3
+        Collection<Issue> linkedIssues = new ArrayList<Issue>();
+
+
+        IssueLinkManager issueLinkManager = ComponentAccessor.getIssueLinkManager();
+        for(IssueLink issueLink: issueLinkManager.getOutwardLinks(parentIssue.getId())){
+            System.out.println(issueLink.getDestinationObject().getKey());
+            System.out.println();
+            linkedIssues.add(issueManager.getIssueObject(issueLink.getDestinationObject().getKey()));
+            System.out.println("");
+
+        }
+
+//        Collection<Issue> linkedTasks =
+        //////////////////////////
 
         // Check that ALL OTHER sub-tasks are closed
         Collection<Issue> subTasks = subTaskManager.getSubTaskObjects(parentIssue);
