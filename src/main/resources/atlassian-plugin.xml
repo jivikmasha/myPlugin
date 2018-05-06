@@ -41,4 +41,8 @@
     <function-class>com.example.plugins.tutorial.jira.workflow.ToInProgressPostFunction</function-class>
     <resource type="velocity" name="view" location="templates/postfunctions/to-in-progress-post-function.vm"/>
   </workflow-function>
+  <component-import key="eventPublisher" interface="com.atlassian.event.api.EventPublisher"/>
+  <component key="eventListener" class="com.example.plugins.tutorial.jira.workflow.IssueCreatedResolvedListener">
+    <description>Class that processes the incoming JIRA issue events.</description>
+  </component>
 </atlassian-plugin>
