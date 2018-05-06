@@ -159,7 +159,9 @@ public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
         {
             System.out.println("descriptor");
             System.out.println(descriptor.getUnconditionalResult().getStatus());
-            if (descriptor.getUnconditionalResult().getStatus().equals(closedStatus.getName()))
+            ////////Костыль, ПОТОМ ПЕРЕДЕЛАТЬ1!!!!
+//            if (descriptor.getUnconditionalResult().getStatus().equals(closedStatus.getName()))
+            if (descriptor.getUnconditionalResult().getStep() == 6)
             {
                 closeAction = descriptor;
                 System.out.println("found");
