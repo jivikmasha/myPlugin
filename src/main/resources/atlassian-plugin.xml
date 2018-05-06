@@ -32,8 +32,13 @@
     <link linkId="atlassian-developers-site-link">http://vk.com/mary_prince</link>
   </web-item>
   <workflow-function key="close" name="Close" i18n-name-key="close.name" class="com.atlassian.jira.plugin.workflow.WorkflowNoInputPluginFactory">
-  <description key="close.description">The Close Plugin</description>
-  <function-class>com.example.plugins.tutorial.jira.workflow.CloseParentIssuePostFunction</function-class>
-  <resource type="velocity" name="view" location="templates/postfunctions/close.vm"/>
+    <description key="close.description">The Close Plugin</description>
+    <function-class>com.example.plugins.tutorial.jira.workflow.CloseParentIssuePostFunction</function-class>
+    <resource type="velocity" name="view" location="templates/postfunctions/close.vm"/>
+  </workflow-function>
+  <workflow-function key="to-in-progress-post-function" name="To In Progress Post Function" i18n-name-key="to-in-progress-post-function.name" class="com.atlassian.jira.plugin.workflow.WorkflowNoInputPluginFactory">
+    <description key="to-in-progress-post-function.description">The To In Progress Post Function Plugin</description>
+    <function-class>com.example.plugins.tutorial.jira.workflow.ToInProgressPostFunction</function-class>
+    <resource type="velocity" name="view" location="templates/postfunctions/to-in-progress-post-function.vm"/>
   </workflow-function>
 </atlassian-plugin>

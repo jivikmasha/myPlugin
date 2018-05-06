@@ -2,7 +2,6 @@ package com.example.plugins.tutorial.jira.workflow;
 
 import java.util.*;
 
-import com.atlassian.crowd.embedded.api.User;
 import com.atlassian.jira.bc.issue.IssueService;
 import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.config.ConstantsManager;
@@ -10,7 +9,6 @@ import com.atlassian.jira.config.SubTaskManager;
 import com.atlassian.jira.issue.*;
 import com.atlassian.jira.issue.link.IssueLink;
 import com.atlassian.jira.issue.link.IssueLinkManager;
-import com.atlassian.jira.issue.link.LinkCollection;
 import com.atlassian.jira.issue.resolution.Resolution;
 import com.atlassian.jira.issue.status.Status;
 import com.atlassian.jira.security.JiraAuthenticationContext;
@@ -18,7 +16,6 @@ import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.workflow.JiraWorkflow;
 import com.atlassian.jira.workflow.WorkflowManager;
 import com.atlassian.jira.workflow.function.issue.AbstractJiraFunctionProvider;
-import com.atlassian.plugin.spring.scanner.annotation.component.Scanned;
 import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
 import com.opensymphony.module.propertyset.PropertySet;
 import com.opensymphony.workflow.WorkflowException;
@@ -31,8 +28,7 @@ import org.slf4j.LoggerFactory;
  * This is the post-function class that gets executed at the end of the transition.
  * Any parameters that were saved in your factory class will be available in the transientVars Map.
  */
-@Scanned
-public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
+public class ToInProgressPostFunction extends AbstractJiraFunctionProvider
 {
     private static final Logger log = LoggerFactory.getLogger(CloseParentIssuePostFunction.class);
     public static final String FIELD_MESSAGE = "messageField";
@@ -43,7 +39,7 @@ public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
     private final Status closedStatus;
     private Resolution resolution;
 
-    public CloseParentIssuePostFunction(@ComponentImport ConstantsManager constantsManager, @ComponentImport WorkflowManager workflowManager,
+    public ToInProgressPostFunction(@ComponentImport ConstantsManager constantsManager, @ComponentImport WorkflowManager workflowManager,
                                         @ComponentImport SubTaskManager subTaskManager, @ComponentImport JiraAuthenticationContext authenticationContext, @ComponentImport IssueManager issueManager) {
         this.workflowManager = workflowManager;
         this.subTaskManager = subTaskManager;
@@ -90,8 +86,9 @@ public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
             return;
         }
 
-        // Ensure that the parent issue is not already closed
-        if (IssueFieldConstants.CLOSED_STATUS_ID == Integer.parseInt(parentIssue.getStatusId()))
+
+        //1 - это т.к. должно быть в анализе
+        if (Integer.parseInt(parentIssue.getStatusId()) != 1)
         {
             return;
         }
@@ -115,25 +112,25 @@ public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
         // Check that ALL OTHER sub-tasks are closed
 //        Collection<Issue> subTasks = subTaskManager.getSubTaskObjects(parentIssue);
 
-        for (Iterator<Issue> iterator = linkedIssues.iterator(); iterator.hasNext();)
-        {
-            Issue associatedSubTask =  iterator.next();
-            if (!subTask.getKey().equals(associatedSubTask.getKey()))
-            {
-                // If other associated sub-task is still open - do not continue
-                if (IssueFieldConstants.CLOSED_STATUS_ID !=
-                        Integer.parseInt(associatedSubTask.getStatusId()))
-                {
-                    return;
-                }
-            }
-        }
+//        for (Iterator<Issue> iterator = linkedIssues.iterator(); iterator.hasNext();)
+//        {
+//            Issue associatedSubTask =  iterator.next();
+//            if (!subTask.getKey().equals(associatedSubTask.getKey()))
+//            {
+//                // If other associated sub-task is still open - do not continue
+//                if (IssueFieldConstants.CLOSED_STATUS_ID !=
+//                        Integer.parseInt(associatedSubTask.getStatusId()))
+//                {
+//                    return;
+//                }
+//            }
+//        }
 
         // All sub-tasks are now closed - close the parent issue
         try
         {
             System.out.println("TRY");
-            resolution = subTask.getResolution();
+//            resolution = subTask.getResolution();
             closeIssue(parentIssue);
             System.out.println("TRY DONE");
         }
@@ -161,10 +158,11 @@ public class CloseParentIssuePostFunction extends AbstractJiraFunctionProvider
             System.out.println(descriptor.getUnconditionalResult().getStatus());
             ////////Костыль, ПОТОМ ПЕРЕДЕЛАТЬ1!!!!
             ////// Чуть лучше сделала но все равно странно, хотя норм
+            //////Мб добавить проверку что она в проекте TP? Это было бы идеально
             /////UPDATE ВСЕ НОРМ СТЕП 6 ЭТО РИЛИ СТАТУС ЗАКРЫТО НАШЛА ПО ВОРКФЛОУ
 //            if (descriptor.getUnconditionalResult().getStatus().equals(closedStatus.getName()))
-//            if (descriptor.getUnconditionalResult().getStatus().equals("Closed"))
-            if (descriptor.getUnconditionalResult().getStep() == 6)
+//            if (descriptor.getUnconditionalResult().getStatus().equals("Underway"))
+            if (descriptor.getUnconditionalResult().getStep() == 3)
             {
                 closeAction = descriptor;
                 System.out.println("found");
